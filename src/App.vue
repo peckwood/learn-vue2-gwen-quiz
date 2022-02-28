@@ -1,19 +1,66 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <Header 
+    :correctAnswerCount="correctAnswerCount"
+    :totalAnswerCount="totalAnswerCount"
+    />
+    <!-- v-if="questions.length", not v-if="questions" -->
+    <b-container v-if="questions.length" class="bv-example-row">
+      <b-row>
+        <b-col sm="6" offset="3">
+          <QuestionBox
+            :currentQuestion="questions[index]"
+            :clickNextMethod="getNext"
+            :afterSubmitAnswer="afterSubmitAnswer"
+          />
+        </b-col>
+      </b-row>
+    </b-container>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import Header from "./components/Header.vue";
+import QuestionBox from "./components/QuestionBox.vue";
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
-    HelloWorld
-  }
-}
+    Header,
+    QuestionBox,
+  },
+  data() {
+    return {
+      questions: [],
+      index: 0,
+      correctAnswerCount: 0,
+      totalAnswerCount: 0
+    };
+  },
+  methods: {
+    getNext() {
+      this.index++;
+    },
+    afterSubmitAnswer(isCorrect){
+      if(isCorrect){
+        this.correctAnswerCount++;
+      }
+      this.totalAnswerCount++;
+    }
+  },
+  mounted: function () {
+    fetch("https://opentdb.com/api.php?amount=10&category=27&type=multiple", {
+      method: "get",
+    })
+      .then((response) => {
+        console.log(response);
+        return response.json();
+      })
+      .then((jsonData) => {
+        this.questions = jsonData.results;
+      });
+  },
+};
 </script>
 
 <style>
